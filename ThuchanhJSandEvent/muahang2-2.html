@@ -1,0 +1,389 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Form đặt hàng</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    padding:20px;
+}
+
+form{
+    width:400px;
+}
+
+.field{
+    margin-bottom:15px;
+}
+
+input,select,textarea{
+    width:100%;
+    padding:6px;
+    margin-top:5px;
+}
+
+textarea{
+    height:80px;
+}
+
+.error{
+    color:red;
+    font-size:13px;
+}
+
+.error-border{
+    border:1px solid red;
+}
+
+.success-border{
+    border:1px solid green;
+}
+
+#noteCount{
+    font-size:13px;
+}
+
+#total{
+    font-weight:bold;
+    margin-top:10px;
+}
+
+#confirmBox{
+    display:none;
+    border:1px solid #ccc;
+    padding:15px;
+    margin-top:20px;
+    width:400px;
+}
+
+#success{
+    display:none;
+    color:green;
+    font-size:20px;
+    margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Đặt hàng</h2>
+
+<form id="orderForm">
+
+<div class="field">
+<label>Sản phẩm</label>
+<select id="product">
+<option value="">-- Chọn sản phẩm --</option>
+<option value="Áo">Áo</option>
+<option value="Quần">Quần</option>
+<option value="Giày">Giày</option>
+</select>
+<span class="error" id="productError"></span>
+</div>
+
+<div class="field">
+<label>Số lượng</label>
+<input type="number" id="quantity">
+<span class="error" id="quantityError"></span>
+</div>
+
+<div class="field">
+<label>Ngày giao hàng</label>
+<input type="date" id="delivery">
+<span class="error" id="deliveryError"></span>
+</div>
+
+<div class="field">
+<label>Địa chỉ giao</label>
+<textarea id="address"></textarea>
+<span class="error" id="addressError"></span>
+</div>
+
+<div class="field">
+<label>Ghi chú</label>
+<textarea id="note"></textarea>
+<div id="noteCount">0/200</div>
+<span class="error" id="noteError"></span>
+</div>
+
+<div class="field">
+<label>Thanh toán</label><br>
+<input type="radio" name="payment" value="COD"> COD
+<input type="radio" name="payment" value="Bank"> Chuyển khoản
+<input type="radio" name="payment" value="Wallet"> Ví điện tử
+<span class="error" id="paymentError"></span>
+</div>
+
+<div id="total">Tổng tiền: 0</div>
+
+<br>
+<button type="submit">Đặt hàng</button>
+
+</form>
+
+
+<div id="confirmBox">
+<h3>Xác nhận đặt hàng</h3>
+<div id="summary"></div>
+<br>
+<button id="confirmBtn">Xác nhận</button>
+<button id="cancelBtn">Hủy</button>
+</div>
+
+<div id="success">Đặt hàng thành công! 🎉</div>
+
+
+<script>
+
+const form = document.getElementById("orderForm")
+
+const product = document.getElementById("product")
+const quantity = document.getElementById("quantity")
+const delivery = document.getElementById("delivery")
+const address = document.getElementById("address")
+const note = document.getElementById("note")
+
+const noteCount = document.getElementById("noteCount")
+const totalDiv = document.getElementById("total")
+
+const confirmBox = document.getElementById("confirmBox")
+const summary = document.getElementById("summary")
+
+
+
+const prices = {
+    "Áo":150000,
+    "Quần":200000,
+    "Giày":500000
+}
+
+
+
+function showError(id,msg){
+    document.getElementById(id+"Error").textContent = msg
+    document.getElementById(id).classList.add("error-border")
+}
+
+
+
+function clearError(id){
+    document.getElementById(id+"Error").textContent = ""
+    document.getElementById(id).classList.remove("error-border")
+    document.getElementById(id).classList.add("success-border")
+}
+
+
+
+function validateProduct(){
+
+    if(product.value === ""){
+        showError("product","Chọn sản phẩm")
+        return false
+    }
+
+    clearError("product")
+    return true
+}
+
+
+
+function validateQuantity(){
+
+    let q = Number(quantity.value)
+
+    if(!Number.isInteger(q) || q < 1 || q > 99){
+        showError("quantity","Số lượng 1-99")
+        return false
+    }
+
+    clearError("quantity")
+    return true
+}
+
+
+
+function validateDelivery(){
+
+    let d = new Date(delivery.value)
+    let today = new Date()
+
+    today.setHours(0,0,0,0)
+
+    let max = new Date()
+    max.setDate(today.getDate()+30)
+
+    if(!delivery.value){
+        showError("delivery","Chọn ngày giao")
+        return false
+    }
+
+    if(d < today){
+        showError("delivery","Không chọn ngày quá khứ")
+        return false
+    }
+
+    if(d > max){
+        showError("delivery","Không quá 30 ngày")
+        return false
+    }
+
+    clearError("delivery")
+    return true
+}
+
+
+
+function validateAddress(){
+
+    let val = address.value.trim()
+
+    if(val.length < 10){
+        showError("address","Ít nhất 10 ký tự")
+        return false
+    }
+
+    clearError("address")
+    return true
+}
+
+
+
+function validateNote(){
+
+    let len = note.value.length
+
+    if(len > 200){
+        showError("note","Tối đa 200 ký tự")
+        return false
+    }
+
+    clearError("note")
+    return true
+}
+
+
+
+function validatePayment(){
+
+    let p = document.querySelector('input[name="payment"]:checked')
+
+    if(!p){
+        document.getElementById("paymentError").textContent="Chọn phương thức"
+        return false
+    }
+
+    document.getElementById("paymentError").textContent=""
+    return true
+}
+
+
+
+function updateTotal(){
+
+    let price = prices[product.value] || 0
+    let q = Number(quantity.value) || 0
+
+    let total = price * q
+
+    totalDiv.textContent =
+        "Tổng tiền: " + total.toLocaleString("vi-VN") + " đ"
+}
+
+
+
+note.addEventListener("input",()=>{
+
+    let len = note.value.length
+
+    noteCount.textContent = len + "/200"
+
+    if(len > 200){
+        noteCount.style.color="red"
+    }else{
+        noteCount.style.color="black"
+    }
+
+})
+
+
+
+product.addEventListener("change",updateTotal)
+quantity.addEventListener("input",updateTotal)
+
+
+
+product.addEventListener("blur",validateProduct)
+quantity.addEventListener("blur",validateQuantity)
+delivery.addEventListener("blur",validateDelivery)
+address.addEventListener("blur",validateAddress)
+note.addEventListener("blur",validateNote)
+
+
+
+product.addEventListener("input",()=>clearError("product"))
+quantity.addEventListener("input",()=>clearError("quantity"))
+delivery.addEventListener("input",()=>clearError("delivery"))
+address.addEventListener("input",()=>clearError("address"))
+note.addEventListener("input",()=>clearError("note"))
+
+
+
+form.addEventListener("submit",(e)=>{
+
+    e.preventDefault()
+
+    let valid =
+        validateProduct() &
+        validateQuantity() &
+        validateDelivery() &
+        validateAddress() &
+        validateNote() &
+        validatePayment()
+
+    if(!valid) return
+
+
+
+    let price = prices[product.value]
+    let q = Number(quantity.value)
+    let total = price*q
+
+    summary.innerHTML = `
+    Sản phẩm: ${product.value}<br>
+    Số lượng: ${q}<br>
+    Tổng tiền: ${total.toLocaleString("vi-VN")} đ<br>
+    Ngày giao: ${delivery.value}
+    `
+
+    confirmBox.style.display="block"
+
+})
+
+
+
+document.getElementById("cancelBtn").onclick = ()=>{
+    confirmBox.style.display="none"
+}
+
+
+
+document.getElementById("confirmBtn").onclick = ()=>{
+
+    confirmBox.style.display="none"
+    form.style.display="none"
+
+    document.getElementById("success").style.display="block"
+
+}
+
+</script>
+
+</body>
+</html>
+```
