@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Student Management</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>STUDENT MANAGEMENT SYSTEM</h1>
+
+<button id="addBtn">Thêm sinh viên</button>
+
+<p id="summary"></p>
+
+<table>
+<thead>
+<tr>
+<th>MÃ SV</th>
+<th>HỌ VÀ TÊN</th>
+<th>NGÀY SINH</th>
+<th>LỚP</th>
+<th>ĐTB</th>
+<th>Email</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="studentTable"></tbody>
+</table>
+
+
+<!-- POPUP FORM -->
+
+<div class="modal" id="modal">
+
+<div class="modal-content">
+
+<h2>Thêm/Sửa sinh viên</h2>
+
+<form id="studentForm">
+
+<input type="hidden" id="editIndex">
+
+<label>Student ID</label>
+<input type="text" id="studentId" placeholder="VD: SV123456">
+<span class="error" id="idError"></span>
+
+<label>Full Name</label>
+<input type="text" id="fullName">
+<span class="error" id="nameError"></span>
+
+<label>Date of Birth</label>
+<input type="date" id="dob">
+<span class="error" id="dobError"></span>
+
+<label>Class</label>
+<select id="class">
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+</select>
+
+<label>GPA</label>
+<input type="text" id="gpa">
+<span class="error" id="gpaError"></span>
+
+<label>Email</label>
+<input type="text" id="email" placeholder="@student.edu.vn">
+<span class="error" id="emailError"></span>
+
+<label>Password</label>
+<input type="password" id="password" placeholder="Tối thiểu 8 ký tự">
+<span class="error" id="passError"></span>
+
+<label>Confirm Password</label>
+<input type="password" id="confirmPassword">
+<span class="error" id="confirmError"></span>
+
+<div class="buttons">
+<button type="submit" id="saveBtn">Lưu sinh viên</button>
+<button type="button" id="closeBtn">Hủy</button>
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
